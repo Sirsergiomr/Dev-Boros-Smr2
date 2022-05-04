@@ -39,7 +39,7 @@ def SheetAPI():
 
     gsheet = cred.open_by_key(id_hoja)
     # obtenemos la hoja de google sheet
-    sheet = gsheet.worksheet('ABRIL_2022')
+    sheet = gsheet.worksheet('MAYO_2022')
 
     return sheet
 
@@ -158,46 +158,46 @@ class YTDLSource(discord.PCMVolumeTransformer):
 lista_canciones = []
 @bot.command()
 async def play(ctx, url: str):
-    voiceChannel = discord.utils.get(ctx.guild.voice_channels, name=ctx.author.voice.channel.name)
-    if voiceChannel is None:
-        await ctx.send('No estás en un canal de voz')
-        return
-    else:
-        try:           
-            await voiceChannel.connect()
-        except:
-            pass
-    
-    
-    voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)     
-
-
-    if voice.is_playing()==False:    
-        filename = await YTDLSource.from_url(url, loop=bot.loop)
-    
-        voice.play(discord.FFmpegPCMAudio(executable="ffmpeg.exe", source=filename), after=lambda e: print('Player error: %s' % e) if e else None)
-        await ctx.send('**Now playing:** {}'.format(filename)) 
-
-    if voice.is_playing()==False:
-        if filename.exist():
-            os.remove(filename)
-    
-
-    #todo : agregar una lista de canciones para que se puedan reproducir varias canciones a la vez 
-    #todo : intentar que no queden archivos residuales en el disco duro.
-    """ if voice and voice.is_playing():
-        lista_canciones.append(filename)
-        print(lista_canciones)
-        await ctx.send('Se ha agregado la canción a la lista')
-        pass
-    else:
-        if lista_canciones.__len__() == 0:
-            voice.play(discord.FFmpegPCMAudio(executable="ffmpeg.exe", source=filename), after=lambda e: print('Player error: %s' % e) if e else None)
+    if ctx.message.author.id == sirsergio:
+        voiceChannel = discord.utils.get(ctx.guild.voice_channels, name=ctx.author.voice.channel.name)
+        if voiceChannel is None:
+            await ctx.send('No estás en un canal de voz')
+            return
         else:
-            for i in lista_canciones:
-                if voice.is_playing()==False:   
-                    voice.play(discord.FFmpegPCMAudio(executable="ffmpeg.exe", source=i), after=lambda e: print('Player error: %s' % e) if e else None)
-    """ 
+            try:           
+                await voiceChannel.connect()
+            except:
+                pass
+        
+        
+        voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)     
+
+        if voice.is_playing()==False:    
+            filename = await YTDLSource.from_url(url, loop=bot.loop)
+        
+            voice.play(discord.FFmpegPCMAudio(executable="ffmpeg.exe", source=filename), after=lambda e: print('Player error: %s' % e) if e else None)
+            await ctx.send('**Now playing:** {}'.format(filename)) 
+
+        if voice.is_playing()==False:
+            if filename.exist():
+                os.remove(filename)
+        
+
+        #todo : agregar una lista de canciones para que se puedan reproducir varias canciones a la vez 
+        #todo : intentar que no queden archivos residuales en el disco duro.
+        """ if voice and voice.is_playing():
+            lista_canciones.append(filename)
+            print(lista_canciones)
+            await ctx.send('Se ha agregado la canción a la lista')
+            pass
+        else:
+            if lista_canciones.__len__() == 0:
+                voice.play(discord.FFmpegPCMAudio(executable="ffmpeg.exe", source=filename), after=lambda e: print('Player error: %s' % e) if e else None)
+            else:
+                for i in lista_canciones:
+                    if voice.is_playing()==False:   
+                        voice.play(discord.FFmpegPCMAudio(executable="ffmpeg.exe", source=i), after=lambda e: print('Player error: %s' % e) if e else None)
+        """ 
 
 @play.error
 async def errorPlay(ctx):
