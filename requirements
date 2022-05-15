@@ -7,3 +7,6 @@ python_dotenv
 gspread
 oauth2client
 pandas
+youtube_dl
+ffmpeg
+PyNaCl

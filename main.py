@@ -1,17 +1,18 @@
-from math import e
-import discord
-from datetime import datetime
-
-from discord.channel import VoiceChannel
-from configuracion import *
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-import pandas as pd
-from discord.ext import commands
-import youtube_dl
 import asyncio
 import os
+from datetime import datetime
+from math import e
+from telnetlib import EC
 
+import discord
+import gspread
+import pandas as pd
+import youtube_dl
+from discord.channel import VoiceChannel
+from discord.ext import commands
+from oauth2client.service_account import ServiceAccountCredentials
+
+from configuracion import *
 
 id_hoja = '1qHJJHi1qPgsGGsmDo35xm68bR9aIiXnntKIDfi3DkA0'
 # credencial de acceso app = AIzaSyA9GX-ar3lc3Tu4583XyNbTa3awbSx8PBQ
@@ -136,7 +137,7 @@ ytdl_format_options = {
 
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
-
+ffmpeg_options = {'options': "-vn"}
 
 class YTDLSource(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, volume=0.5):
@@ -146,19 +147,19 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.url = ""
 
     @classmethod
-    async def from_url(cls, url, *, loop=None, stream=False):
+    async def from_url(cls, url, *, loop=None, stream=True):
         loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
         if 'entries' in data:
             # take first item from a playlist
             data = data['entries'][0]
         filename = data['title'] if stream else ytdl.prepare_filename(data)
         return filename
 
-lista_canciones = []
+voice_clients = {}
 @bot.command()
 async def play(ctx, url: str):
-    if ctx.message.author.id == sirsergio:
+    """  await ctx.send('Helloow')
         voiceChannel = discord.utils.get(ctx.guild.voice_channels, name=ctx.author.voice.channel.name)
         if voiceChannel is None:
             await ctx.send('No estás en un canal de voz')
@@ -166,42 +167,56 @@ async def play(ctx, url: str):
         else:
             try:           
                 await voiceChannel.connect()
-            except:
-                pass
-        
-        
-        voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)     
+            except Exception as e:
+                print("PASS NOT ENTER ", e.args)
+                pass"""
+    
+    try:
+        voice_client = await ctx.author.voice.channel.connect()
+        voice_clients[voice_client.guild.id] = voice_client
+    except:
+        print("error")
 
-        if voice.is_playing()==False:    
-            filename = await YTDLSource.from_url(url, loop=bot.loop)
-        
-            voice.play(discord.FFmpegPCMAudio(executable="ffmpeg.exe", source=filename), after=lambda e: print('Player error: %s' % e) if e else None)
-            await ctx.send('**Now playing:** {}'.format(filename)) 
+    try:
+        loop = asyncio.get_event_loop()
+        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
 
-        if voice.is_playing()==False:
-            if filename.exist():
-                os.remove(filename)
-        
+        song = data['url']
+        player = discord.FFmpegPCMAudio(song, **ffmpeg_options)
 
-        #todo : agregar una lista de canciones para que se puedan reproducir varias canciones a la vez 
-        #todo : intentar que no queden archivos residuales en el disco duro.
-        """ if voice and voice.is_playing():
-            lista_canciones.append(filename)
-            print(lista_canciones)
-            await ctx.send('Se ha agregado la canción a la lista')
-            pass
-        else:
-            if lista_canciones.__len__() == 0:
-                voice.play(discord.FFmpegPCMAudio(executable="ffmpeg.exe", source=filename), after=lambda e: print('Player error: %s' % e) if e else None)
-            else:
-                for i in lista_canciones:
-                    if voice.is_playing()==False:   
-                        voice.play(discord.FFmpegPCMAudio(executable="ffmpeg.exe", source=i), after=lambda e: print('Player error: %s' % e) if e else None)
-        """ 
+        voice_clients[ctx.guild.id].play(player)
+
+    except Exception as err:
+            print(err)
+    """   try:
+            voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)     
+
+
+            if voice.is_playing()==False:    
+                filename = await YTDLSource.from_url(url, loop=bot.loop)
+                if oldfilename is not None:
+                    try:
+                        if oldfilename.exist():
+                            os.remove(oldfilename)
+                    except:
+                        pass
+
+                oldfilename = filename
+            
+                voice.play(discord.FFmpegPCMAudio(executable="ffmpeg", source=filename), after=lambda e: print('Player error: %s' % e) if e else None)
+                await ctx.send('**Now playing:** {}'.format(filename)) 
+            
+
+
+    except Exception as e:
+        await ctx.send(e.args)
+        pass"""
+    
+    
 
 @play.error
 async def errorPlay(ctx):
-    await ctx.send('No se ha podido reproducir la canción')
+   await ctx.send('No se ha podido reproducir la canción')
 
 @bot.command()
 async def leave(ctx):
