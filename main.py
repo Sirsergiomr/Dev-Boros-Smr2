@@ -14,13 +14,13 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 from configuracion import *
 
-id_hoja = '1qHJJHi1qPgsGGsmDo35xm68bR9aIiXnntKIDfi3DkA0'
+id_hoja = ''
 # credencial de acceso app = AIzaSyA9GX-ar3lc3Tu4583XyNbTa3awbSx8PBQ
 # datos del bot proporcionados por discord
 TOKEN = get_token()
 GUILD = get_guild()
 # client = discord.Client()
-sirsergio = 368302438953910273
+sirsergio = ""
 
 
 bot = commands.Bot(command_prefix='$')
