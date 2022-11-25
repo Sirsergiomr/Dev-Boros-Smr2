@@ -15,7 +15,6 @@ from oauth2client.service_account import ServiceAccountCredentials
 from configuracion import *
 
 id_hoja = ''
-# credencial de acceso app = AIzaSyA9GX-ar3lc3Tu4583XyNbTa3awbSx8PBQ
 # datos del bot proporcionados por discord
 TOKEN = get_token()
 GUILD = get_guild()
